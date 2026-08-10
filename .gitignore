@@ -1,0 +1,73 @@
+# ===== Secrets / local config (CRITICAL - never commit these) =====
+local.settings.json
+*.env
+.env
+.env.*
+**/connection-strings.txt
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ===== Azure Functions =====
+bin/
+obj/
+appsettings.json
+local.settings.json
+.python_packages/
+worker.config.json
+extensions.csproj
+
+# Azurite emulator files
+__azurite_db*__.json
+__blobstorage__/
+__queuestorage__/
+__tablestorage__/
+
+# Durable Functions local storage artifacts (if any leak into repo root)
+*.blob
+*.queue
+
+# ===== Logic Apps / ARM (if you export locally) =====
+*.parameters.json
+!*.parameters.example.json
+
+# ===== VS Code =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ===== OS junk =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+
+# ===== Editor swap/backup files =====
+*.swp
+*.swo
+*~
+
+# ===== Node (only relevant if you touch Logic Apps tooling / npm packages) =====
+node_modules/

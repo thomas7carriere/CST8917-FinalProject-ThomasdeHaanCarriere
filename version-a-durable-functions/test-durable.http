@@ -1,0 +1,141 @@
+@baseUrl = http://localhost:7071/api
+
+### =========================================================
+### Scenario 1: Valid expense under $100 -> Auto-approved
+### =========================================================
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+
+{
+  "employee_name": "Alice Chen",
+  "employee_email": "alice.chen@example.com",
+  "amount": 45.00,
+  "category": "supplies",
+  "description": "Notebooks and pens",
+  "manager_email": "mgr.bob@example.com"
+}
+
+# Expected: statusQueryGetUri returns runtimeStatus "Completed", output.status = "approved", auto = true
+# Copy the statusQueryGetUri from the response and paste it below to check status.
+
+
+### =========================================================
+### Scenario 2: Valid expense >= $100, manager APPROVES
+### =========================================================
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+
+{
+  "employee_name": "Ben Okafor",
+  "employee_email": "ben.okafor@example.com",
+  "amount": 350.00,
+  "category": "travel",
+  "description": "Flight to client site",
+  "manager_email": "mgr.bob@example.com"
+}
+
+# ^ Grab the "id" (instance_id) from this response, then send the decision below
+# before the durable timer expires.
+
+### Send manager approval for Scenario 2
+# Replace {instance_id} with the id returned above
+POST {{baseUrl}}/expenses/e7cddbcbe30843dda844bd24f5403fe4/decision
+Content-Type: application/json
+
+{
+  "decision": "approved"
+}
+
+# Expected: orchestration output.status = "approved"
+
+
+### =========================================================
+### Scenario 3: Valid expense >= $100, manager REJECTS
+### =========================================================
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+
+{
+  "employee_name": "Carla Diaz",
+  "employee_email": "carla.diaz@example.com",
+  "amount": 800.00,
+  "category": "equipment",
+  "description": "Replacement laptop",
+  "manager_email": "mgr.bob@example.com"
+}
+
+### Send manager rejection for Scenario 3
+# Replace {instance_id} with the id returned above
+POST {{baseUrl}}/expenses/94db96d120144163a91fea008321b2a1/decision
+Content-Type: application/json
+
+{
+  "decision": "rejected"
+}
+
+# Expected: orchestration output.status = "rejected"
+
+
+### =========================================================
+### Scenario 4: Valid expense >= $100, NO manager response -> Escalated
+### =========================================================
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+
+{
+  "employee_name": "Dev Patel",
+  "employee_email": "dev.patel@example.com",
+  "amount": 500.00,
+  "category": "software",
+  "description": "Annual IDE license",
+  "manager_email": "mgr.bob@example.com"
+}
+
+# Do NOT send a decision. Wait past the durable timer deadline
+# (shorten it in code for testing, e.g. timedelta(minutes=1)),
+# then poll the statusQueryGetUri.
+# Expected: orchestration output.status = "escalated"
+
+
+### =========================================================
+### Scenario 5: Missing required fields -> Validation error
+### =========================================================
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+
+{
+  "employee_name": "Erin Fisher",
+  "amount": 60.00,
+  "category": "meals",
+  "description": "Team lunch"
+}
+
+# Missing: employee_email, manager_email
+# Expected: output.status = "validation_error"
+
+
+### =========================================================
+### Scenario 6: Invalid category -> Validation error
+### =========================================================
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+
+{
+  "employee_name": "Frank Lopez",
+  "employee_email": "frank.lopez@example.com",
+  "amount": 75.00,
+  "category": "vacation",
+  "description": "Trip to Hawaii",
+  "manager_email": "mgr.bob@example.com"
+}
+
+# "vacation" is not in the valid category list
+# Expected: output.status = "validation_error"
+
+
+### =========================================================
+### Helper: Check orchestration status manually
+### =========================================================
+# After any POST above, the response body includes a statusQueryGetUri.
+# You can either click/send that directly, or use this templated version:
+GET http://localhost:7071/runtime/webhooks/durabletask/instances/{instance_id}?taskHub=TestHubName&connection=Storage&code=
