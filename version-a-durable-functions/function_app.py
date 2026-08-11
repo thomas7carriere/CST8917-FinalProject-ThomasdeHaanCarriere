@@ -35,7 +35,7 @@ def expense_orchestrator(context: df.DurableOrchestrationContext):
         return {"status": "approved", "auto": True}
 
     # Manager approval path
-    timeout_deadline = context.current_utc_datetime + timedelta(seconds=20)  # adjust for testing
+    timeout_deadline = context.current_utc_datetime + timedelta(seconds=30)  # adjust for testing
     timer_task = context.create_timer(timeout_deadline)
     approval_event = context.wait_for_external_event("ManagerDecision")
 
