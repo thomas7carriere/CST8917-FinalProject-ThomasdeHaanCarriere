@@ -39,7 +39,7 @@ Content-Type: application/json
 
 ### Send manager approval for Scenario 2
 # Replace {instance_id} with the id returned above
-POST {{baseUrl}}/expenses/cf00651804e44551bc283bddd64548ac/decision
+POST {{baseUrl}}/expenses/<id>/decision
 Content-Type: application/json
 
 {
@@ -66,7 +66,7 @@ Content-Type: application/json
 
 ### Send manager rejection for Scenario 3
 # Replace {instance_id} with the id returned above
-POST {{baseUrl}}/expenses/39ad88eef22a4da088a962674fea24e1/decision
+POST {{baseUrl}}/expenses/<id>/decision
 Content-Type: application/json
 
 {
